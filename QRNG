@@ -1,0 +1,11 @@
+def quantum_random_number(num_bits=4):
+    qubits = [cirq.LineQubit(i) for i in range(num_bits)]
+    circuit = cirq.Circuit()
+    circuit.append(cirq.H.on_each(*qubits))
+    circuit.append(cirq.measure(*qubits, key='result'))
+    simulator = cirq.Simulator()
+    result = simulator.run(circuit)
+    measured_bits = result.measurements['result'][0]
+    random_number = int("".join(str(bit) for bit in measured_bits[::-1]), 2)  # little endian
+    return random_number
+print("Random number (0–15):", quantum_random_number(4))
