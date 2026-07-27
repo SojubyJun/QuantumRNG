@@ -1,0 +1,15 @@
+import requests
+
+def fetch_plaintext_integers(quantity, minimum, maximum):
+    url = f"https://www.random.org/integers/?num={quantity}&min={minimum}&max={maximum}&col=1&base=10&format=plain&rnd=new"
+
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        # Split plaintext lines and convert strings to integers
+        return [int(num) for num in response.text.strip().split()]
+    else:
+        return None
+
+numbers = fetch_plaintext_integers(quantity=200, minimum=1, maximum=9)
+print(numbers)
