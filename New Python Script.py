@@ -90,7 +90,11 @@ print(f"Prime p: {p}")
 print(f"Prime q: {q}")
 print(f"Public Key  (n, e): ({n}, {e})")
 print(f"Private Key (n, d): ({n}, {d})")
-
+original_data = 999
+cipher_data = pow(original_data, e, n)
+print(f"Cipher value: {cipher_data}")
+recovered_data = pow(cipher_data, d, n)
+print(f"Recovered numerical value: {recovered_data}")
 
 
 
