@@ -29,9 +29,7 @@ def make_trng_bit(num_bits):
     #get from random.org
     pass
 
-#rng_choice = 
-def generate_prime(rng_choice):   #(rng choice):
-    pass
+
 
 #Convert to integer
 
@@ -53,7 +51,7 @@ def generate_prime(rng_choice):
 
 # RSA Key Generation
 
-my_choice = input("Choose a random number generator (PRNG, CSPRNG, TRNG, QRNG): ")
+my_choice = (input("Choose a random number generator (PRNG, CSPRNG, TRNG, QRNG): ").strip().upper())
 p = generate_prime(my_choice)
 q = generate_prime(my_choice)
 while p == q:
@@ -65,6 +63,8 @@ e = 65537
 if gcd(e, phi) != 1:
     e = 3
 d = pow(e, -1, phi)
+
+#print results
 
 
 
