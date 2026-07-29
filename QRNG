@@ -22,4 +22,5 @@ def quantum_random_number(num_bits=4):
 
 # Example usage
 print("Random number (0–15):", quantum_random_number(664))
-bin(int(quantum_random_number(664)))
+Qcombined = str(quantum_random_number(664))
+bin(int(Qcombined, 36))
