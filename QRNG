@@ -1,11 +1,25 @@
 def quantum_random_number(num_bits=4):
+    # Step 1: Create qubits
     qubits = [cirq.LineQubit(i) for i in range(num_bits)]
+
+    # Step 2: Create the quantum circuit
     circuit = cirq.Circuit()
+
+    # Apply Hadamard gates to all qubits to create superposition
     circuit.append(cirq.H.on_each(*qubits))
+
+    # Measure all qubits
     circuit.append(cirq.measure(*qubits, key='result'))
+
+    # Step 3: Simulate the circuit
     simulator = cirq.Simulator()
     result = simulator.run(circuit)
+
+    # Step 4: Extract the measured bits and convert to integer
     measured_bits = result.measurements['result'][0]
     random_number = int("".join(str(bit) for bit in measured_bits[::-1]), 2)  # little endian
     return random_number
-print("Random number (0–15):", quantum_random_number(4))
+
+# Example usage
+print("Random number (0–15):", quantum_random_number(664))
+bin(int(quantum_random_number(664)))
