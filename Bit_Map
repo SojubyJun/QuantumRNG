@@ -1,0 +1,113 @@
+from math import gcd
+import random
+import secrets
+import time
+import matplotlib.pyplot as plt
+import numpy as np
+import requests
+
+
+
+
+num_bits = 16
+trng_buffer = []
+
+
+def make_classical_bit(bits):
+    return random.getrandbits(bits)
+
+
+
+
+def make_csprng_bit(bits):
+    return secrets.randbits(bits)
+
+
+
+
+def make_qrng_bit(bits):
+    import cirq
+
+
+    qubits = [cirq.LineQubit(i) for i in range(bits)]
+    circuit = cirq.Circuit()
+    circuit.append(cirq.H.on_each(*qubits))
+    circuit.append(cirq.measure(*qubits, key="result"))
+    simulator = cirq.Simulator()
+    result = simulator.run(circuit)
+    measured_bits = result.measurements["result"][0]
+    return int("".join(str(bit) for bit in measured_bits[::-1]), 2)
+
+
+
+
+def make_trng_bit(num_bits):
+    """TRNG: Fetches true physical entropy/randomness from Random.org."""
+    # Calculate max possible value for given bit size (e.g., 8 bits -> 0 to 255)
+    max_val = (1 << num_bits) - 1
+
+
+    url = f"https://www.random.org/integers/?num=1&min=0&max={max_val}&col=1&base=10&format=plain&rnd=new"
+
+
+    try:
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            return int(response.text.strip())
+    except Exception as e:
+        print(f"TRNG network fetch failed ({e}), using fallback.")
+    pass
+
+
+def get_random_number(rng_choice, bits=8):
+    if rng_choice == "PRNG":
+        return make_classical_bit(bits)
+    elif rng_choice == "CSPRNG":
+        return make_csprng_bit(bits)
+    elif rng_choice == "TRNG":
+        return make_trng_bit(bits)
+    elif rng_choice == "QRNG":
+        return make_qrng_bit(bits)
+    else:
+        return make_classical_bit(bits)
+
+
+
+
+
+
+#Bitmap generator
+def generate_randomness_bitmap(rng_choice, bits=8, grid_size=256):
+    total_bits_needed = grid_size * grid_size
+    bit_list = []
+
+
+    while len(bit_list) < total_bits_needed:
+        num = get_random_number(rng_choice, bits)
+        binary_string = f"{num:0{bits}b}"
+        bit_list.extend([int(b) for b in binary_string])
+
+
+    bit_array = np.array(bit_list[:total_bits_needed]).reshape(
+        grid_size, grid_size
+    )
+
+
+    plt.figure(figsize=(5, 5))
+    plt.imshow(bit_array, cmap="binary", interpolation="nearest")
+    plt.title(f"Bit Noise Map: {rng_choice}")
+    plt.axis("off")
+
+
+    filename = f"{rng_choice}_bitmap.png"
+    plt.savefig(filename, bbox_inches="tight")
+    plt.close()
+    print(f"Saved '{filename}' to workspace!")
+
+
+print("Generating bitmaps...")
+for model in ["PRNG", "CSPRNG", "TRNG", "QRNG"]:
+    generate_randomness_bitmap(model)
+
+
+print("\nDone")
