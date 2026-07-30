@@ -1,0 +1,83 @@
+import time
+import secrets
+import random 
+
+
+
+num_bytes = 1000
+num_runs = 10
+
+results = {
+    'QRNG': {'elapsed_time': [], 'bit_rate': [], 'mega_bit_rate': []},
+    'TRNG': {'elapsed_time': [], 'bit_rate': [], 'mega_bit_rate': []},
+    'CSPRNG': {'elapsed_time': [], 'bit_rate': [], 'mega_bit_rate': []},
+    'PRNG': {'elapsed_time': [], 'bit_rate': [], 'mega_bit_rate': []},
+}
+
+print(f"--- Running Bitrate Measurements for {num_runs} Iterations ---")
+
+for run in range(num_runs):
+    # QRNG
+    start_time = time.perf_counter()
+    random_data_qrng = quantum_random_number(num_bytes * 8)
+    end_time = time.perf_counter()
+    elapsed_time_qrng = end_time - start_time
+    total_bits_qrng = num_bytes * 8
+    bit_rate_qrng = total_bits_qrng / elapsed_time_qrng
+    mega_bit_rate_qrng = bit_rate_qrng / 1_000_000
+    results['QRNG']['elapsed_time'].append(elapsed_time_qrng)
+    results['QRNG']['bit_rate'].append(bit_rate_qrng)
+    results['QRNG']['mega_bit_rate'].append(mega_bit_rate_qrng)
+
+    #TRNG
+    start_time = time.perf_counter()
+ 
+    trng_numbers = fetch_plaintext_integers(quantity=200, minimum=1, maximum=9)
+    if trng_numbers is None: 
+        print("Warning: TRNG fetch failed. Skipping TRNG for this run.")
+        
+        elapsed_time_trng, bit_rate_trng, mega_bit_rate_trng = 0, 0, 0
+    else:
+        pass 
+    end_time = time.perf_counter()
+    elapsed_time_trng = end_time - start_time
+    total_bits_trng = num_bytes * 8
+    bit_rate_trng = total_bits_trng / elapsed_time_trng if elapsed_time_trng > 0 else 0
+    mega_bit_rate_trng = bit_rate_trng / 1_000_000
+    results['TRNG']['elapsed_time'].append(elapsed_time_trng)
+    results['TRNG']['bit_rate'].append(bit_rate_trng)
+    results['TRNG']['mega_bit_rate'].append(mega_bit_rate_trng)
+
+    # CSPRNG
+    start_time = time.perf_counter()
+    random_data_csprng = secrets.randbits(num_bytes * 8)
+    end_time = time.perf_counter()
+    elapsed_time_csprng = end_time - start_time
+    total_bits_csprng = num_bytes * 8
+    bit_rate_csprng = total_bits_csprng / elapsed_time_csprng
+    mega_bit_rate_csprng = bit_rate_csprng / 1_000_000
+    results['CSPRNG']['elapsed_time'].append(elapsed_time_csprng)
+    results['CSPRNG']['bit_rate'].append(bit_rate_csprng)
+    results['CSPRNG']['mega_bit_rate'].append(mega_bit_rate_csprng)
+
+    # PRNG
+    start_time = time.perf_counter()
+    random_data_prng = random.getrandbits(num_bytes * 8)
+    end_time = time.perf_counter()
+    elapsed_time_prng = end_time - start_time
+    total_bits_prng = num_bytes * 8
+    bit_rate_prng = total_bits_prng / elapsed_time_prng
+    mega_bit_rate_prng = bit_rate_prng / 1_000_000
+    results['PRNG']['elapsed_time'].append(elapsed_time_prng)
+    results['PRNG']['bit_rate'].append(bit_rate_prng)
+    results['PRNG']['mega_bit_rate'].append(mega_bit_rate_prng)
+
+
+print(f"\n--- Average Bitrate Data over {num_runs} Runs ---")
+for rng_type, data in results.items():
+    avg_elapsed_time = sum(data['elapsed_time']) / num_runs
+    avg_bit_rate = sum(data['bit_rate']) / num_runs
+    avg_mega_bit_rate = sum(data['mega_bit_rate']) / num_runs
+    print(f"\n{rng_type}:")
+    print(f"  Average Generated {num_bytes} bytes in {avg_elapsed_time:.4f} seconds.")
+    print(f"  Average Bit rate: {avg_bit_rate:,.2f} bps ({avg_mega_bit_rate:.2f} Mbps)")
